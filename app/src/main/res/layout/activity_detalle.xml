@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".view.DetalleActivity">
+
+    <ImageView
+        android:id="@+id/detalleImagen"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_placeholder"
+        android:contentDescription="Imagen del ítem" />
+
+    <TextView
+        android:id="@+id/detalleTitulo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        tools:text="Título del elemento" />
+
+    <TextView
+        android:id="@+id/detalleDescripcion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        tools:text="Esta es la descripción completa del elemento seleccionado. Aquí puedes incluir toda la información relevante que quieras mostrar al usuario cuando seleccione un elemento del RecyclerView." />
+
+</LinearLayout>
