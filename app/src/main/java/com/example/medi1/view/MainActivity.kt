@@ -7,16 +7,19 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medi1.R
+import com.example.medi1.api.MedicamentosApi
+import com.example.medi1.api.RetrofitClient
 import com.example.medi1.controller.ItemAdapter
 import com.example.medi1.model.ItemRepository
+import com.example.medi1.model.MedicamentoResponse
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : Activity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ItemAdapter
 
     // Instanciamos el repositorio
-    private val itemRepository = ItemRepository()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,24 +28,35 @@ class MainActivity : Activity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         // Intentamos cargar desde la API
-        itemRepository.getMedicamentosFromApi { items ->
-            if (items != null && items.isNotEmpty()) {
-                setupRecyclerView(items)
-            } else {
-                // Si falla, usamos los datos locales
-                val localItems = itemRepository.getAllItems()
-                setupRecyclerView(localItems)
-                Toast.makeText(this, "Usando datos locales", Toast.LENGTH_SHORT).show()
-            }
-        }
+        getMedicamentosFromApi()
     }
 
-    private fun setupRecyclerView(items: List<com.ejemplo.tuapp.model.Item>) {
+    fun getMedicamentosFromApi() {
+        val call = RetrofitClient.retrofit.create(MedicamentosApi::class.java)
+        call.getMedicamentos().enqueue(object : Callback<List<MedicamentoResponse>> {
+            override fun onResponse(
+                call: retrofit2.Call<List<MedicamentoResponse>>,
+                response: Response<List<MedicamentoResponse>>
+            ) {
+                if (response.isSuccessful) {
+                    // Mapear los datos de la API a nuestro modelo Item
+                    val items = response.body()
+                    setupRecyclerView(items!!)
+                } else {
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<List<MedicamentoResponse>>, t: Throwable) {
+            }
+        })
+    }
+
+    private fun setupRecyclerView(items: List<MedicamentoResponse>) {
         adapter = ItemAdapter(items) { item ->
             val intent = Intent(this, DetalleActivity::class.java).apply {
                 putExtra("ITEM_ID", item.id)
-                putExtra("ITEM_TITULO", item.titulo)
-                putExtra("ITEM_DESCRIPCION", item.descripcion)
+                putExtra("ITEM_TITULO", item.name)
+                putExtra("ITEM_DESCRIPCION", item.avatar)
             }
             startActivity(intent)
         }

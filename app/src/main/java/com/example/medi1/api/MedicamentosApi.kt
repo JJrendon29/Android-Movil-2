@@ -6,6 +6,6 @@ import retrofit2.Call
 import retrofit2.http.GET
 
 interface MedicamentosApi {
-    @GET("medicamentos")
+    @GET("medi/medicamentos")
     fun getMedicamentos(): Call<List<MedicamentoResponse>>
 }

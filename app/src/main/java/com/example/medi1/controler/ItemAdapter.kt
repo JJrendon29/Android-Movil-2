@@ -8,10 +8,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ejemplo.tuapp.model.Item
 import com.example.medi1.R
+import com.example.medi1.model.MedicamentoResponse
 
 class ItemAdapter(
-    private val items: List<Item>,
-    private val onItemClick: (Item) -> Unit
+    private val items: List<MedicamentoResponse>,
+    private val onItemClick: (MedicamentoResponse) -> Unit
 ) : RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     // Define la estructura de cada elemento de la vista
@@ -34,8 +35,8 @@ class ItemAdapter(
         val currentItem = items[position]
 
         // Asigna los valores a las vistas
-        holder.itemTitle.text = currentItem.titulo
-        holder.itemDescription.text = currentItem.descripcion
+        holder.itemTitle.text = currentItem.id
+        holder.itemDescription.text = currentItem.name
 
         // Aquí podrías cargar la imagen con Glide o Picasso si tienes una URL
         // Por ejemplo, con Glide:
