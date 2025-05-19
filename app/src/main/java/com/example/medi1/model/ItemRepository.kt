@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/medi1/model/ItemRepository.kt
 package com.example.medi1.model
 
 import com.ejemplo.tuapp.model.Item
@@ -8,7 +7,74 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class ItemRepository {
-    // Método para obtener datos de la API
+    // Variables para paginación del lado cliente
+    private var allMedicamentos: List<MedicamentoResponse> = emptyList()
+    private var isDataLoaded = false
+    private val pageSize = 10
+
+    // NUEVO: Método principal para obtener datos paginados
+    fun getPagedMedicamentos(
+        page: Int,
+        callback: (List<MedicamentoResponse>, Boolean) -> Unit // (data, hasMore)
+    ) {
+        if (!isDataLoaded) {
+            // Primera carga: obtener todos los datos
+            loadAllData {
+                val (pageData, hasMore) = getCurrentPage(page)
+                callback(pageData, hasMore)
+            }
+        } else {
+            // Ya tenemos datos, solo paginar
+            val (pageData, hasMore) = getCurrentPage(page)
+            callback(pageData, hasMore)
+        }
+    }
+
+    // NUEVO: Cargar todos los datos una sola vez
+    private fun loadAllData(callback: () -> Unit) {
+        // Intentar cargar desde API primero
+        getMedicamentosFromApi { apiData ->
+            allMedicamentos = apiData ?: run {
+                // Si API falla, usar datos locales como fallback
+                getAllItems().map { item ->
+                    MedicamentoResponse(
+                        id = item.id.toString(),
+                        name = item.titulo,
+                        avatar = "",
+                        createdAt = ""
+                    )
+                }
+            }
+            isDataLoaded = true
+            callback()
+        }
+    }
+
+    // NUEVO: Obtener página específica de los datos cargados
+    private fun getCurrentPage(page: Int): Pair<List<MedicamentoResponse>, Boolean> {
+        val startIndex = page * pageSize
+        val endIndex = minOf(startIndex + pageSize, allMedicamentos.size)
+
+        val pageData = if (startIndex < allMedicamentos.size) {
+            allMedicamentos.subList(startIndex, endIndex)
+        } else {
+            emptyList()
+        }
+
+        val hasMore = endIndex < allMedicamentos.size
+        return Pair(pageData, hasMore)
+    }
+
+    // NUEVO: Reiniciar paginación (útil para pull-to-refresh)
+    fun resetPagination() {
+        isDataLoaded = false
+        allMedicamentos = emptyList()
+    }
+
+    // NUEVO: Obtener total de items cargados
+    fun getTotalItemsCount(): Int = allMedicamentos.size
+
+    // MÉTODO ORIGINAL: Mantener para uso interno y compatibilidad
     fun getMedicamentosFromApi(callback: (List<MedicamentoResponse>?) -> Unit) {
         val call = RetrofitClient.retrofit.create(MedicamentosApi::class.java)
         call.getMedicamentos().enqueue(object : Callback<List<MedicamentoResponse>> {
@@ -31,12 +97,10 @@ class ItemRepository {
         })
     }
 
-    // Mantener el método original como fallback
+    // MÉTODO ORIGINAL: Mantener igual para que DetalleActivity siga funcionando
     fun getAllItems(): List<Item> {
         // Tus datos originales
         return listOf(
-
-
             Item(
                 id = 1,
                 titulo = "Paracetamol",
@@ -88,7 +152,7 @@ class ItemRepository {
         )
     }
 
-    // Una función para obtener un ítem específico por su ID
+    // MÉTODO ORIGINAL: Mantener igual para que DetalleActivity siga funcionando
     fun getItemById(id: Int): Item? {
         return getAllItems().find { it.id == id }
     }
